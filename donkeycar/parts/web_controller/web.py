@@ -126,6 +126,7 @@ class LocalWebController(tornado.web.Application):
             (r"/calibrate", CalibrateHandler),
             (r"/video", VideoAPI),
             (r"/wsTest", WsTest),
+            (r"/minimap", MinimapAPI),
 
             (r"/static/(.*)", StaticFileHandler,
              {"path": self.static_file_path}),
@@ -192,6 +193,57 @@ class DriveAPI(RequestHandler):
         self.application.mode = data['drive_mode']
         self.application.recording = data['recording']
 
+#class MinimapAPI(RequestHandler):
+#    async def get(self):
+#        self.set_header("Content-type:", "text/html;charset=UTF-8")
+#
+#        numTimes = 0
+#        while True:
+#            self.write('HELLO WORLD!')
+#            numTimes += 1
+#            if numTimes >= 100:
+#                 break
+
+class MinimapAPI(tornado.websocket.WebSocketHandler):
+
+    def check_origin(self, origin):
+        return True
+
+    async def open(self):
+        return False
+        print("New minimap client connected")
+        self.application.wsclients.append(self)
+
+        served_position_timestamp = time.time()
+        numTimes = 0
+        while True:
+            interval = 0.250
+            if served_position_timestamp + interval < time.time():
+                self.write_message("hello world i am here "+str(numTimes))
+                served_position_timestamp = time.time()
+                #try:
+                #    await self.flush()
+                #except tornado.iostream.StreamClosedError:
+                #    pass
+                numTimes += 1
+                if numTimes >= 10000:
+                    break
+            else:
+                await tornado.gen.sleep(interval)
+
+    def on_message(self, message):
+        print("Printing minimap message")
+
+        #numTimes = 100
+        #while True:
+        #    self.write_message("hello world i am here")
+        #    numTimes += 1
+        #    if numTimes >= 200:
+        #        break
+
+    def on_close(self):
+        print("Client disconnected")
+        self.application.wsclients.remove(self)
 
 class WsTest(RequestHandler):
     def get(self):

@@ -54,6 +54,11 @@
     <hr>
     <div class="row">
       <div class="col-xs-4 col-sm-2 col-md-2">
+        <div id="minimap">
+           <div class="minimap">
+             <img id="minimap" class="img-responsive" src="static/minimap.png"></img>
+           </div>
+        </div>
         <div id="control-bars">
           <label class="group-label">Angle &amp; Throttle</label>
           <div>
@@ -165,6 +170,13 @@
   $( document ).ready(function() {
     console.log( "document ready!" );
     driveHandler.load()
+  });
+</script>
+
+<script type="text/javascript">
+  $( document ).ready(function() {
+    console.log( "minimap ready!" );
+    minimapHandler.load()
   });
 </script>
 

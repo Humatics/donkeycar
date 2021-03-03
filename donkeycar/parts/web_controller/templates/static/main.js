@@ -1,3 +1,13 @@
+var minimapHandler = new function() {
+    this.load = function() {
+        var socket = new WebSocket('ws://' + location.host + '/minimap');
+
+        socket.onmessage = function (event) {
+            console.log(event.data);
+        };
+    };
+}();
+
 var driveHandler = new function() {
     //functions used to drive the vehicle. 
 
@@ -37,7 +47,7 @@ var driveHandler = new function() {
     this.load = function() {
       driveURL = '/drive'
       socket = new WebSocket('ws://' + location.host + '/wsDrive');
-      
+
       socket.onmessage = function (event) {
           console.log(event.data);
       };
@@ -82,6 +92,12 @@ var driveHandler = new function() {
           if(e.which == 65) { updateDriveMode('auto') } // 'a' turn on auto mode
           if(e.which == 68) { updateDriveMode('user') } // 'd' turn on manual mode
           if(e.which == 83) { updateDriveMode('auto_angle') } // 'a' turn on auto mode
+	  if(e.which != 32 && e.which != 82 && e.which != 73 && e.which != 75 && e.which != 74 && e.which != 76 && e.which != 65 && e.which != 68 && e.which != 83) { console.log("keyboard", e) } // JPGDEBUG WHEN NO INPUT
+      });
+
+      $(document).keyup(function(e) {
+          if(e.which == 73 || e.which == 75) { throttleZero() }
+          if(e.which == 74 || e.which == 76) { angleZero() }
       });
 
       $('#mode_select').on('change', function () {
@@ -384,24 +400,38 @@ var driveHandler = new function() {
     }
 
     var throttleUp = function(){
-      state.tele.user.throttle = limitedThrottle(Math.min(state.tele.user.throttle + .05, 1));
+      state.tele.user.throttle = 1.0;
+      //state.tele.user.throttle = limitedThrottle(Math.min(state.tele.user.throttle + .05, 1));
       postDrive()
     };
 
     var throttleDown = function(){
-      state.tele.user.throttle = limitedThrottle(Math.max(state.tele.user.throttle - .05, -1));
+      state.tele.user.throttle = -1.0;
+      //state.tele.user.throttle = limitedThrottle(Math.max(state.tele.user.throttle - .05, -1));
+      postDrive()
+    };
+
+    var throttleZero = function(){
+      state.tele.user.throttle = 0.0;
       postDrive()
     };
 
     var angleLeft = function(){
-      state.tele.user.angle = Math.max(state.tele.user.angle - .1, -1)
+      state.tele.user.angle = -1.0;
+      //state.tele.user.angle = Math.max(state.tele.user.angle - .1, -1)
       postDrive()
     };
 
     var angleRight = function(){
-      state.tele.user.angle = Math.min(state.tele.user.angle + .1, 1)
+      state.tele.user.angle = 1.0;
+      //state.tele.user.angle = Math.min(state.tele.user.angle + .1, 1)
       postDrive()
     };
+
+    var angleZero = function(){
+      state.tele.user.angle = 0.0;
+      postDrive();
+    }
 
     var updateDriveMode = function(mode){
       state.driveMode = mode;
